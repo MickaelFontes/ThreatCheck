@@ -1,0 +1,39 @@
+name: Build and create release
+
+on: [ push ]
+# on:
+#   push:
+#     tags:
+#       - "*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+      - name: Display dotnet version
+        run: dotnet --version
+      - name: Install dependencies
+        run: dotnet restore
+      - name: Build release
+        run: dotnet build --configuration Release --no-restore
+      - name: Archive the artefacts
+        run: |
+          zip ThreatCheck.zip ThreatCheck/bin/Release/net481/*
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Release
+          path: ThreatCheck.zip
+      # - name: Create Release & Upload dist/index.js
+      #   uses: softprops/action-gh-release@5be0e66d93ac7ed76da52eca8bb058f665c3a5fe #2.4.2
+      #   if: github.ref_type == 'tag'
+      #   with:
+      #     files: |
+      #       Release.txt
+      #       LICENSE
